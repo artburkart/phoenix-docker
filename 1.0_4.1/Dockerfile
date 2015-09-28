@@ -1,41 +1,23 @@
-FROM buildpack-deps:trusty
-MAINTAINER Arthur Burkart <artburkart@gmail.com>
+FROM artburkart/elixir:1.0.5
+MAINTAINER Arthur Burkart <arturkart@gmail.com>
 
-RUN locale-gen en_US.UTF-8
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
-ENV OTP_VERSION 18.1
-ENV ELIXIR_VERSION 1.0.5
+# Set up environment variables
+ENV DEBIAN_FRONTEND noninteractive
+ENV LANG C.UTF-8
+
 ENV PHOENIX_VERSION 1.0.2
 ENV NODE_VERSION 4.1.1
 ENV NPM_VERSION 2.14.0
-ENV PATH $PATH:/elixir/bin
 
-# Install git
-RUN apt-get update && apt-get install -y git inotify-tools
+# Install inotify-tools for watching files
+RUN apt-get update && apt-get install -y inotify-tools && rm -rf /var/lib/apt/lists/*
 
-# Install Erlang from source
-ADD http://erlang.org/download/otp_src_${OTP_VERSION}.tar.gz /usr/src/
-RUN cd /usr/src \
-    && tar xf otp_src_${OTP_VERSION}.tar.gz \
-    && cd otp_src_${OTP_VERSION} \
-    && ./configure \
-    && make -j8 \
-    && make install \
-    && rm -rf /usr/src/otp_src_${OTP_VERSION} && rm /usr/src/otp_src_${OTP_VERSION}.tar.gz \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install elixir from source
-RUN git clone --depth 1 --branch v$ELIXIR_VERSION https://github.com/elixir-lang/elixir.git && cd elixir && make
-
-# Install Phoenix from source with some previous requirements
+# Install Phoenix from source
 RUN git clone --depth 1 --branch v$PHOENIX_VERSION https://github.com/phoenixframework/phoenix.git \
  && cd phoenix && mix local.hex --force && mix local.rebar --force \
- && mix do deps.get, compile \
- && mix archive.install https://github.com/phoenixframework/phoenix/releases/download/v$PHOENIX_VERSION/phoenix_new-$PHOENIX_VERSION.ez --force
+ && mix do deps.get, compile
 
-# Berify gpg and sha256: http://nodejs.org/dist/v0.12.5/SHASUMS256.txt.asc
+# Verify gpg and sha256: http://nodejs.org/dist/v0.12.5/SHASUMS256.txt.asc
 # gpg keys listed at https://github.com/nodejs/node
 RUN set -ex \
   && for key in \
@@ -49,7 +31,7 @@ RUN set -ex \
     gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
   done
 
-# install Node.js and NPM in order to satisfy brunch.io dependencies
+# Install Node.js and NPM in order to satisfy brunch.io dependencies
 # the snippet below is borrowed from the official nodejs Dockerfile
 # https://registry.hub.docker.com/_/node/
 ADD http://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz /
@@ -60,5 +42,3 @@ RUN gpg --verify SHASUMS256.txt.asc \
  && rm "node-v$NODE_VERSION-linux-x64.tar.gz" SHASUMS256.txt.asc \
  && npm install -g npm@"$NPM_VERSION" \
  && npm cache clear
-
-WORKDIR /code

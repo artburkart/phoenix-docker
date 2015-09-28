@@ -1,4 +1,4 @@
-FROM artburkart/phoenix:1.0_4.1
+FROM artburkart/phoenix:1.0_0.12
 MAINTAINER Arthur Burkart <artburkart@gmail.com>
 
 RUN mkdir -p /usr/src/app
