@@ -12,10 +12,11 @@ ENV NPM_VERSION 2.14.0
 # Install inotify-tools for watching files
 RUN apt-get update && apt-get install -y inotify-tools && rm -rf /var/lib/apt/lists/*
 
-# Install Phoenix from source
+# Install Phoenix from source as well as phoenix mix tools
 RUN git clone --depth 1 --branch v$PHOENIX_VERSION https://github.com/phoenixframework/phoenix.git \
  && cd phoenix && mix local.hex --force && mix local.rebar --force \
- && mix do deps.get, compile
+ && mix do deps.get, compile \
+ && mix archive.install https://github.com/phoenixframework/phoenix/releases/download/v$PHOENIX_VERSION/phoenix_new-$PHOENIX_VERSION.ez --force
 
 # Verify gpg and sha256: http://nodejs.org/dist/v0.12.7/SHASUMS256.txt.asc
 # gpg keys listed at https://github.com/nodejs/node
@@ -38,3 +39,7 @@ RUN gpg --verify SHASUMS256.txt.asc \
  && rm "node-v$NODE_VERSION-linux-x64.tar.gz" SHASUMS256.txt.asc \
  && npm install -g npm@"$NPM_VERSION" \
  && npm cache clear
+
+EXPOSE 4000
+
+CMD ["bash", "-c", "mix deps.get && mix phoenix.server"]
