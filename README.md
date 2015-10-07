@@ -19,8 +19,6 @@ $ docker run -it --rm --expose 4000 -P -v "$PWD":/code -w /code/my_new_app artbu
 
 # Image Variants
 
-The `artburkart/phoenix` images come in many flavors, each designed for a specific use case.
-
 ## `artburkart/phoenix:<version>`
 
 This is the defacto image. If you are unsure about what your needs are, you probably want to use this one. It is designed to be used both as a throw away container (mount your source code and start the container to start your app), as well as the base to build other images off of.
@@ -35,8 +33,6 @@ Once you've got a handle on how your project functions within Docker, you'll pro
 
 # Supported Docker versions
 
-This image is officially supported on Docker version 1.8.2.
-
-Support for older versions (down to 1.0) is provided on a best-effort basis.
+I built this image with docker 1.8.2
 
 This Dockerfile borrows a ton from [marcelocg](https://hub.docker.com/r/marcelocg/phoenix/)'s image and from the [official](https://hub.docker.com/explore/) repos (there is no official image for elixir or phoenix)
